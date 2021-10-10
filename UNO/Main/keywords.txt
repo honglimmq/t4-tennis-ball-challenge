@@ -1,0 +1,14 @@
+UnoPayload  KEYWORD1
+MegaPayload KEYWORD1
+StorageService  KEYWORD1
+setUnoPayload   KEYWORD2
+setUnoJoys  KEYWORD2
+setUnoBtns  KEYWORD2
+getUnoPayload   KEYWORD2
+getUnoJoy1  KEYWORD2
+getUnoJoy2  KEYWORD2
+getUnoMovementState KEYWORD2
+getUnoDoorState KEYWORD2
+getUnoEmergencyState    KEYWORD2
+setMegaPayload  KEYWORD2
+getMegaPayload  KEYWORD2
