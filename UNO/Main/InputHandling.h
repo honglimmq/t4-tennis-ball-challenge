@@ -122,6 +122,7 @@ class Potentiometer: public AnalogSensor {
         VALUE = analogRead(PIN);
     }
 };
+
 class Joystick {
   private:
   public:
