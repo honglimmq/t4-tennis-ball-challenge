@@ -5,6 +5,7 @@
 
 UnoPayload _unoPayload;
 MegaPayload _megaPayload;
+int _btErrorCode;
 
 StorageService::StorageService() {
   // Initalising the payloads:
@@ -22,10 +23,13 @@ StorageService::StorageService() {
   _megaPayload._doorState = false;
   _megaPayload._emergencyState = false;
   _megaPayload._robotFeedback = 0;
+
+  // Bluetooth error code
+  _btErrorCode = 0;
 }
 
 // UnoPayload setters
-void setUnoPayload(int yVal1, int yVal2, bool movement, bool door, bool emergency) {
+void StorageService::setUnoPayload(int yVal1, int yVal2, bool movement, bool door, bool emergency) {
   // Joystick values
   _unoPayload._rawValY1 = (yVal1 >= 0) ? yVal1 : 0;
   _unoPayload._rawValY2 = (yVal2 >= 0) ? yVal2 : 0;
@@ -36,51 +40,66 @@ void setUnoPayload(int yVal1, int yVal2, bool movement, bool door, bool emergenc
   _unoPayload._emergencyState = emergency;
 }
 
-void setUnoPayload(struct UnoPayload uno) {
+void StorageService::setUnoJoy1(int yVal) {
+  _unoPayload._rawValY1 = (yVal >= 0) ? yVal : 0;
+}
+void StorageService::setUnoJoy2(int yVal) {
+  _unoPayload._rawValY2 = (yVal >= 0) ? yVal : 0;
+}
+void StorageService::setUnoMovementState(bool movement) {
+  _unoPayload._movementState = movement;
+}
+void StorageService::setUnoDoorState(bool door) {
+   _unoPayload._doorState = door;
+}
+void StorageService::setUnoEmergencyState(bool emergency) {
+  _unoPayload._emergencyState = emergency;
+}
+
+void StorageService::setUnoPayload(struct UnoPayload uno) {
   setUnoPayload(uno._rawValY1, uno._rawValY2,
                 _unoPayload._movementState, _unoPayload._doorState,
                 _unoPayload._emergencyState); 
 }
 
-void setUnoJoys(int yVal1, int yVal2) {
+void StorageService::setUnoJoys(int yVal1, int yVal2) {
   setUnoPayload(yVal1, yVal2,
                 _unoPayload._movementState, _unoPayload._doorState,
                 _unoPayload._emergencyState);
 }
 
-void setUnoBtns(bool movement, bool door, bool emergency) {
+void StorageService::setUnoBtns(bool movement, bool door, bool emergency) {
   setUnoPayload(_unoPayload._rawValY1, _unoPayload._rawValY2,
                 movement, door,
                 emergency);
 }
 
 // UnoPayload getters
-struct UnoPayload getUnoPayload() {
+struct UnoPayload StorageService::getUnoPayload() {
   struct UnoPayload temp = {_unoPayload._rawValY1, _unoPayload._rawValY2,
            _unoPayload._movementState, _unoPayload._doorState,
-           _unoPayload._emergencyState
-  };
+           _unoPayload._emergencyState};
   return temp;
 }
 
-int getUnoJoy1() {
+int StorageService::getUnoJoy1() {
   return _unoPayload._rawValY1;
 }
-int getUnoJoy2() {
+int StorageService::getUnoJoy2() {
   return _unoPayload._rawValY2;
 }
-bool getUnoMovementState() {
+bool StorageService::getUnoMovementState() {
   return _unoPayload._movementState;
 }
-bool getUnoDoorState() {
+bool StorageService::getUnoDoorState() {
   return _unoPayload._doorState;
 }
-bool getUnoEmergencyState() {
+bool StorageService::getUnoEmergencyState() {
   return _unoPayload._emergencyState;
 }
 
 // MegaPayload setters and getters
-void setMegaPayload(int leftRPM, int rightRPM, bool movement, bool door, bool emergency, int feedback) {
+void StorageService::setMegaPayload(int leftRPM, int rightRPM, bool movement, bool door, bool emergency, int feedback) {
   _megaPayload._rpmLeft = leftRPM;
   _megaPayload._rpmRight = rightRPM;
   _megaPayload._movementState = movement;
@@ -89,10 +108,40 @@ void setMegaPayload(int leftRPM, int rightRPM, bool movement, bool door, bool em
   _megaPayload._robotFeedback = feedback;
 }
 
-struct MegaPayload getMegaPayload() {
+struct MegaPayload StorageService::getMegaPayload() {
   struct MegaPayload temp = {_megaPayload._rpmLeft, _megaPayload._rpmRight,
            _megaPayload._movementState, _megaPayload._doorState,
            _megaPayload._emergencyState, _megaPayload._robotFeedback
   };
   return temp;
+}
+
+int StorageService::getMegaLRPM(){
+  return _megaPayload._rpmLeft;
+}
+
+int StorageService::getMegaRRPM(){
+  return _megaPayload._rpmRight;
+}
+bool StorageService::getMegaMovementState() {
+  return _megaPayload._movementState;
+}
+bool StorageService::getMegaDoorState() {
+  return _megaPayload._doorState;
+}
+bool StorageService::getMegaEmergencyState() {
+  return _megaPayload._emergencyState;
+}
+int StorageService::getMegaRobotFeedback() {
+  return _megaPayload._robotFeedback;
+}
+
+// Bluetooth error code
+
+void StorageService::setBTErrorCode(int n){
+  _btErrorCode = n; 
+}
+
+int StorageService::getBTErrorCode(){
+  return _btErrorCode;
 }

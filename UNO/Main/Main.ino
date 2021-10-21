@@ -119,8 +119,8 @@ void setupBT()
 void sendPayload()
 {
   // Mapping of joystick analog values to Bluetooth target values
-  byte joy1 = map(storageService.getUnoJoy1, ANALOG_JOY_MIN, ANALOG_JOY_MAX, JOY_BT_MIN, JOY_BT_MAX);
-  byte joy2 = map(storageService.getUnoJoy2, ANALOG_JOY_MIN, ANALOG_JOY_MAX, JOY_BT_MIN, JOY_BT_MAX);
+  byte joy1 = map(storageService.getUnoJoy1(), ANALOG_JOY_MIN, ANALOG_JOY_MAX, JOY_BT_MIN, JOY_BT_MAX);
+  byte joy2 = map(storageService.getUnoJoy2(), ANALOG_JOY_MIN, ANALOG_JOY_MAX, JOY_BT_MIN, JOY_BT_MAX);
 
   // Retrieving the rest of the payload and send it off via Bluetooth
   // BT.send(joy1, joy2, storageService.getUnoMovementState(), storageService.getUnoDoorState(), storageService.getUnoEmergencyState());
