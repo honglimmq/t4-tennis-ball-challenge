@@ -1,8 +1,6 @@
-/*
-  Control Box Software
-  Team: T4CB
-  Members: Hong Lim, Maisha Famida Rahman, Eric Huang, Syed Muneeb Ahmed Hashmi, Xuanzi Liu
-*/
+// Control Box Software
+// Team: T4CB
+// Members: Hong Lim, Maisha Famida Rahman, Eric Huang, Syed Muneeb Ahmed Hashmi, Xuanzi Liu
 
 #define ANALOG_JOY_MIN 203
 #define ANALOG_JOY_MAX 797
@@ -23,11 +21,16 @@
 
 #define LCD_SCL 3
 #define LCD_SDA 4
+#define LCD_ADDR 0x27
+#define LCD_CHAR 16
+#define LCD_ROW 2
 
 #include "StorageService.h"
 #include "UnoPayload.h"
 #include "MegaPayload.h"
 #include "InputHandling.h"
+#include <Wire.h>
+#include <LiquidCrystal_I2C.h>
 
 StorageService storageService;
 
@@ -40,19 +43,34 @@ unsigned long prevBTMillis = 0;
 unsigned long btnUpdateInterval = 50;
 unsigned long joyUpdateInterval = 50;
 unsigned long BTUpdateInterval = 100;
+unsigned long lcdUpdateInterval = 500;
 
-// instaniate sensors & LCD
 Button s1(BTN_MOVEMENT_PIN); // movement
 Button s2(BTN_DOOR_PIN);     // door
 Button s3(BTN_ESTOP_PIN);    // emergency
-Button s4(7);                // unassigned
+// Button s4();                 // not assigned
 Joystick j1(JOYL_X_PIN, JOYL_Y_PIN);
 Joystick j2(JOYR_X_PIN, JOYR_Y_PIN);
-LCD lcd(LCD_SCL, LCD_SDA);
+LiquidCrystal_I2C lcd(LCD_ADDR, LCD_CHAR, LCD_ROW);
 
 void setup()
 {
+  // initialize LCD
+  lcd.begin();
+  lcd.clear();
+  lcd.print("Welcome");
+  lcd.backlight();
+
+  // initialize Bluetooth
   setupBT();
+
+  // initialize input sensors
+  s1.refresh();
+  s2.refresh();
+  s3.refresh();
+  // s4.refresh();
+  j1.refresh();
+  j2.refresh();
 }
 
 void loop()
@@ -65,15 +83,18 @@ void loop()
     // event 1: Handle buttons
     if (currMillis - prevBtnMillis >= btnUpdateInterval)
     {
+      // refresh sensor data before use
       s1.refresh();
       s2.refresh();
       s3.refresh();
       // s4.refresh();
 
       if (s1.hasChanged())
-      { // setUnoBtns(bool movement, bool door, bool emergency);
-        // comment by Eric: StorageService consider storing <int> instead of <bool>
-        // comment by Eric: StorageService needs methods setting sensor values individually
+      {
+        // StorageService.setUnoBtns(bool movement, bool door, bool emergency);
+        // consider using <int> instead of <bool>
+        // needs methods setting sensor values individually
+        // e.g. StorageService.setEmergencyState(s1.VALUE);
         storageService.setUnoBtns(s1.VALUE, s2.VALUE, s3.VALUE);
       }
 
@@ -96,6 +117,7 @@ void loop()
     // comment by Eric: consider integrating event 2 into event 1
     if (currMillis - prevJoyMillis >= joyUpdateInterval)
     {
+      // refresh sensor data before use
       j1.Y.refresh();
       j2.Y.refresh();
 
@@ -114,6 +136,16 @@ void loop()
     if (currMillis - prevBTMillis >= BTUpdateInterval)
     {
       sendPayload();
+    }
+
+    // last event: Refresh LCD
+    if (currMillis - prevBTMillis >= lcdUpdateInterval)
+    {
+      // LCD needs StorageService being finalised before retrieving data
+      lcd.clear();
+      lcd.setCursor(0, 0); // going to start of the 1st line
+      lcd.print("Hello World");
+      lcd.setCursor(0, 1); // going to start of the 2nd line
     }
   }
 }
