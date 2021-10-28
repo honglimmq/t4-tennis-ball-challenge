@@ -50,7 +50,7 @@ void StorageService::setUnoMovementState(bool movement) {
   _unoPayload._movementState = movement;
 }
 void StorageService::setUnoDoorState(bool door) {
-   _unoPayload._doorState = door;
+  _unoPayload._doorState = door;
 }
 void StorageService::setUnoEmergencyState(bool emergency) {
   _unoPayload._emergencyState = emergency;
@@ -59,7 +59,7 @@ void StorageService::setUnoEmergencyState(bool emergency) {
 void StorageService::setUnoPayload(struct UnoPayload uno) {
   setUnoPayload(uno._rawValY1, uno._rawValY2,
                 _unoPayload._movementState, _unoPayload._doorState,
-                _unoPayload._emergencyState); 
+                _unoPayload._emergencyState);
 }
 
 void StorageService::setUnoJoys(int yVal1, int yVal2) {
@@ -78,7 +78,8 @@ void StorageService::setUnoBtns(bool movement, bool door, bool emergency) {
 struct UnoPayload StorageService::getUnoPayload() {
   struct UnoPayload temp = {_unoPayload._rawValY1, _unoPayload._rawValY2,
            _unoPayload._movementState, _unoPayload._doorState,
-           _unoPayload._emergencyState};
+           _unoPayload._emergencyState
+  };
   return temp;
 }
 
@@ -108,6 +109,31 @@ void StorageService::setMegaPayload(int leftRPM, int rightRPM, bool movement, bo
   _megaPayload._robotFeedback = feedback;
 }
 
+
+void StorageService::setMegaLRPM(int leftRPM) {
+  _megaPayload._rpmLeft = leftRPM;
+}
+
+void StorageService::setMegaRRPM(int rightRPM) {
+  _megaPayload._rpmRight = rightRPM;
+}
+void StorageService::setMegaMovementState(bool movement) {
+  _megaPayload._movementState = movement;
+}
+
+void StorageService::setMegaDoorState(bool door) {
+  _megaPayload._doorState = door;
+}
+
+void StorageService::setMegaEmergencyState(bool emergency) {
+  _megaPayload._emergencyState = emergency;
+}
+
+void StorageService::setMegaRobotFeedback(int feedback) {
+  _megaPayload._robotFeedback = feedback;
+}
+
+
 struct MegaPayload StorageService::getMegaPayload() {
   struct MegaPayload temp = {_megaPayload._rpmLeft, _megaPayload._rpmRight,
            _megaPayload._movementState, _megaPayload._doorState,
@@ -116,11 +142,11 @@ struct MegaPayload StorageService::getMegaPayload() {
   return temp;
 }
 
-int StorageService::getMegaLRPM(){
+int StorageService::getMegaLRPM() {
   return _megaPayload._rpmLeft;
 }
 
-int StorageService::getMegaRRPM(){
+int StorageService::getMegaRRPM() {
   return _megaPayload._rpmRight;
 }
 bool StorageService::getMegaMovementState() {
@@ -138,10 +164,10 @@ int StorageService::getMegaRobotFeedback() {
 
 // Bluetooth error code
 
-void StorageService::setBTErrorCode(int n){
-  _btErrorCode = n; 
+void StorageService::setBTErrorCode(int n) {
+  _btErrorCode = n;
 }
 
-int StorageService::getBTErrorCode(){
+int StorageService::getBTErrorCode() {
   return _btErrorCode;
 }

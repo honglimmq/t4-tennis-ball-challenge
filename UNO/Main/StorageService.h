@@ -24,6 +24,12 @@ class StorageService {
     bool getUnoDoorState();
     bool getUnoEmergencyState();
     void setMegaPayload(int leftRPM, int rightRPM, bool movement, bool door, bool emergency, int feedback);
+    void setMegaLRPM(int leftRPM);
+    void setMegaRRPM(int rightRPM);
+    void setMegaMovementState(bool movement);
+    void setMegaDoorState(bool door);
+    void setMegaEmergencyState(bool emergency);
+    void setMegaRobotFeedback(int feedback);
     struct MegaPayload getMegaPayload();
     int getMegaLRPM();
     int getMegaRRPM();

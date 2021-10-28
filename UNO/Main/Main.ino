@@ -2,6 +2,9 @@
 // Team: T4CB
 // Members: Hong Lim, Maisha Famida Rahman, Eric Huang, Syed Muneeb Ahmed Hashmi, Xuanzi Liu
 
+#define DEBUG 1
+#define BAUD_RATE 9600
+
 #define ANALOG_JOY_MIN 203
 #define ANALOG_JOY_MAX 797
 #define JOY_BT_MIN 0
@@ -39,11 +42,14 @@ unsigned long currMillis = 0;
 unsigned long prevBtnMillis = 0;
 unsigned long prevJoyMillis = 0;
 unsigned long prevBTMillis = 0;
+unsigned long prevLCDMillis = 0;
+unsigned long prevRecieveMillis = 0;
 
 unsigned long btnUpdateInterval = 50;
 unsigned long joyUpdateInterval = 50;
 unsigned long BTUpdateInterval = 100;
 unsigned long lcdUpdateInterval = 500;
+unsigned long ReceiveUpdateInterval = 100;
 
 Button s1(BTN_MOVEMENT_PIN); // movement
 Button s2(BTN_DOOR_PIN);     // door
@@ -55,6 +61,10 @@ LiquidCrystal_I2C lcd(LCD_ADDR, LCD_CHAR, LCD_ROW);
 
 void setup()
 {
+  // initalize serial monitor
+  Serial.begin(BAUD_RATE);
+  Serial.println("Welcome!");
+
   // initialize LCD
   lcd.begin();
   lcd.clear();
@@ -71,77 +81,106 @@ void setup()
   // s4.refresh();
   j1.refresh();
   j2.refresh();
+
+  #if DEBUG
+    Serial.println("Entered DEBUG mode");
+  #endif
+
+  #if DEBUG
+    if(connectionStatus()){
+      Serial.println("BT: The connection link is established");
+    }
+    else{
+      Serial.println("BT: The connection link is down");
+    }
+  #endif
 }
 
 void loop()
 {
   currMillis = millis();
 
-  // if (BT.connection()) // checks comms link
+  // Checks comms link
   if (connectionStatus())
   {
-    // event 1: Handle buttons
+    // Event 1: Handle buttons
     if (currMillis - prevBtnMillis >= btnUpdateInterval)
     {
-      // refresh sensor data before use
+      // Refresh sensor data
       s1.refresh();
       s2.refresh();
       s3.refresh();
       // s4.refresh();
 
+      // Movement button
       if (s1.hasChanged())
       {
-        // StorageService.setUnoBtns(bool movement, bool door, bool emergency);
-        // consider using <int> instead of <bool>
-        // needs methods setting sensor values individually
-        // e.g. StorageService.setEmergencyState(s1.VALUE);
-        storageService.setUnoBtns(s1.VALUE, s2.VALUE, s3.VALUE);
+        storageService.setUnoMovementState(s1.VALUE);
+        #if DEBUG
+                Serial.println("BUTTON: Movement button has been pressed");
+        #endif
       }
 
+      // Door button
       if (s2.hasChanged())
       {
-        storageService.setUnoBtns(s1.VALUE, s2.VALUE, s3.VALUE);
+        storageService.setUnoDoorState(s2.VALUE);
+        #if DEBUG
+                Serial.println("BUTTON: Door button has been pressed");
+        #endif
       }
 
+      // Emergency button
       if (s3.hasChanged())
       {
-        storageService.setUnoBtns(s1.VALUE, s2.VALUE, s3.VALUE);
-      }
-
-      if (s4.hasChanged())
-      {
+        storageService.setUnoEmergencyState(s3.VALUE);
+        #if DEBUG
+                Serial.println("BUTTON: Emergency button has been pressed");
+        #endif
       }
     }
 
-    // event 2: Handle joysticks
-    // comment by Eric: consider integrating event 2 into event 1
+    // Event 2: Handle joysticks
     if (currMillis - prevJoyMillis >= joyUpdateInterval)
     {
       // refresh sensor data before use
       j1.Y.refresh();
       j2.Y.refresh();
 
+      // Left joystick
       if (j1.Y.hasChanged())
       {
         storageService.setUnoJoys(j1.Y.VALUE, j2.Y.VALUE);
       }
 
+      // Right joystick
       if (j2.Y.hasChanged())
       {
         storageService.setUnoJoys(j1.Y.VALUE, j2.Y.VALUE);
       }
+      #if DEBUG
+           Serial.print("JOYSTICK: Left Joy = ");
+           Serial.print(storageService.getUnoJoy1);
+           Serial.print(" Right Joy = ");
+           Serial.print(storageService.getUnoJoy2);
+           Serial.print("\n");
+      #endif
     }
 
-    // event 3: Send payload to the robot
+    // Event 3: Send payload to the robot
     if (currMillis - prevBTMillis >= BTUpdateInterval)
     {
       sendPayload();
     }
 
-    // last event: Refresh LCD
-    if (currMillis - prevBTMillis >= lcdUpdateInterval)
+    // Event 4: Receieve and store payload from the robot
+    if (currMillis - prevReceiveMillis >= ReceiveUpdateInterval) {
+      recievePayload();
+    }
+
+    // Last event: Refresh LCD
+    if (currMillis - prevLCDMillis >= lcdUpdateInterval)
     {
-      // LCD needs StorageService being finalised before retrieving data
       lcd.clear();
       lcd.setCursor(0, 0); // going to start of the 1st line
       lcd.print("Hello World");
@@ -155,8 +194,7 @@ void loop()
 */
 void setupBT()
 {
-  // Initialising BT module to allocated pins
-  // BT.setup(BT_RX_PIN, BT_TX_PIN);
+  // Initialising BT module (if the pin change, need to change directly in BT library)
   BLE_UNO_init();
 }
 
@@ -167,6 +205,12 @@ void sendPayload()
   byte joy2 = map(storageService.getUnoJoy2(), ANALOG_JOY_MIN, ANALOG_JOY_MAX, JOY_BT_MIN, JOY_BT_MAX);
 
   // Retrieving the rest of the payload and send it off via Bluetooth
-  // BT.send(joy1, joy2, storageService.getUnoMovementState(), storageService.getUnoDoorState(), storageService.getUnoEmergencyState());
-  sendData(left_joystick, right_joystick, emergency_stop, start_stop, open_close);
+  sendData(joy1, joy2, storageService.getUnoEmergencyState(), storageService.getUnoMovementState(), storageService.getUnoDoorState());
+}
+/*
+    Response Manager
+*/
+void recievePayload() {
+  // Recieve payload using BT library functions and store it for later use
+  storageService.setMegaPayload(rpm_l(), rpm_r(), door_state(), moving_status(), feedback_status());
 }
