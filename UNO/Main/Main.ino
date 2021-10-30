@@ -138,6 +138,8 @@ void loop()
                 Serial.println("BUTTON: Emergency button has been pressed");
         #endif
       }
+      
+      prevBtnMillis = currMillis;
     }
 
     // Event 2: Handle joysticks
@@ -165,17 +167,20 @@ void loop()
            Serial.print(storageService.getUnoJoy2);
            Serial.print("\n");
       #endif
+      prevJoyMillis = currMillis;
     }
 
     // Event 3: Send payload to the robot
     if (currMillis - prevBTMillis >= BTUpdateInterval)
     {
       sendPayload();
+      prevBTMillis = currMillis;
     }
 
     // Event 4: Receieve and store payload from the robot
     if (currMillis - prevReceiveMillis >= ReceiveUpdateInterval) {
       recievePayload();
+      prevReceiveMillis = currMillis;
     }
 
     // Last event: Refresh LCD
@@ -185,7 +190,12 @@ void loop()
       lcd.setCursor(0, 0); // going to start of the 1st line
       lcd.print("Hello World");
       lcd.setCursor(0, 1); // going to start of the 2nd line
+      prevLCDMillis = currMillis;
     }
+  } else {
+    #if DEBUG
+      Serial.println("BT: The connection link is down");
+    #endif
   }
 }
 
